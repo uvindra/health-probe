@@ -10,7 +10,7 @@ This document outlines the implementation of a health probe for multi service ar
 
 According to the above definition, the following categories of bad health can be idenitified:
 
-- **Troubled:** The system is uable to fullfill the requests it receives within an expected time window. This would indicate that the system is responding slower than expected. If the system continues to be pressured to serve requests under these conditions its health condition may progress to a more critical level. If the requests are backed off the system may have breathing space to recover.
+- **Troubled:** The system is unable to fullfill the requests it receives within an expected time limit. This would indicate that the system is responding slower than expected. If the system continues to be pressured to serve requests under these conditions its health condition may deteriorate to a more critical level. If the requests are backed off the system may have breathing space to recover.
 
 - **Critical:** The system is unable to fullfill the requests it receives. Backing off requests will not help the system recover.
 
