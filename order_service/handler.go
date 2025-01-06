@@ -9,7 +9,7 @@ type OrderHandler struct {
 	service *OrderService
 }
 
-func NewOrderHandler(service *OrderService) *OrderHandler {
+func NewOrderRouter(service *OrderService) *OrderHandler {
 	return &OrderHandler{service: service}
 }
 
@@ -19,22 +19,22 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err := h.service.PlaceOrder(order)
-	if err != nil {
-		http.Error(w, err.Error(), err.HttpStatus())
+	resp := h.service.placeOrder(order)
+	if resp.IsError() {
+		http.Error(w, resp.Error(), resp.HttpStatus())
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(resp.HttpStatus())
 	json.NewEncoder(w).Encode(order)
 }
 
 func (h *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	order, err := h.service.FetchOrder(id)
+	order, resp := h.service.fetchOrder(id)
 
-	if err != nil {
-		http.Error(w, err.Error(), err.HttpStatus())
+	if resp.IsError() {
+		http.Error(w, resp.Error(), resp.HttpStatus())
 		return
 	}
 

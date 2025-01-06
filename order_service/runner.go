@@ -7,23 +7,23 @@ import (
 )
 
 type OrderServiceRunner struct {
-	orderHandler *OrderHandler
-	server       *http.Server
-	name         string
+	router *OrderHandler
+	server *http.Server
+	name   string
 }
 
 func NewOrderServiceRunner() *OrderServiceRunner {
 	return &OrderServiceRunner{
-		orderHandler: NewOrderHandler(NewOrderService()),
-		name:         "Order Service",
+		router: NewOrderRouter(NewOrderService()),
+		name:   "Order Service",
 	}
 }
 
 func (r *OrderServiceRunner) Start(port int) {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /orders", r.orderHandler.CreateOrder)
-	mux.HandleFunc("GET /orders/{id}", r.orderHandler.GetOrder)
+	mux.HandleFunc("POST /orders", r.router.CreateOrder)
+	mux.HandleFunc("GET /orders/{id}", r.router.GetOrder)
 
 	addr := fmt.Sprintf(":%d", port)
 
