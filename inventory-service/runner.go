@@ -10,16 +10,18 @@ type InventoryServiceRunner struct {
 	router *InventoryHandler
 	server *http.Server
 	name   string
+	port   int
 }
 
-func NewInventoryServiceRunner() *InventoryServiceRunner {
+func NewInventoryServiceRunner(port int) *InventoryServiceRunner {
 	return &InventoryServiceRunner{
 		router: NewInventoryRouter(NewInventoryService()),
 		name:   "Inventory Service",
+		port:   port,
 	}
 }
 
-func (r *InventoryServiceRunner) Start(port int) {
+func (r *InventoryServiceRunner) Start() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /items", r.router.AddItem)
@@ -27,7 +29,7 @@ func (r *InventoryServiceRunner) Start(port int) {
 	mux.HandleFunc("PUT /items", r.router.UpdateItem)
 	mux.HandleFunc("DELETE /items/{id}", r.router.DeleteItem)
 
-	addr := fmt.Sprintf(":%d", port)
+	addr := fmt.Sprintf(":%d", r.port)
 
 	log.Printf("Starting %s on %s\n", r.name, addr)
 	r.server = &http.Server{Addr: addr, Handler: mux}

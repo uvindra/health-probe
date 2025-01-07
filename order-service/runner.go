@@ -10,22 +10,24 @@ type OrderServiceRunner struct {
 	router *OrderHandler
 	server *http.Server
 	name   string
+	port   int
 }
 
-func NewOrderServiceRunner() *OrderServiceRunner {
+func NewOrderServiceRunner(port int) *OrderServiceRunner {
 	return &OrderServiceRunner{
 		router: NewOrderRouter(NewOrderService()),
 		name:   "Order Service",
+		port:   port,
 	}
 }
 
-func (r *OrderServiceRunner) Start(port int) {
+func (r *OrderServiceRunner) Start() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /orders", r.router.CreateOrder)
 	mux.HandleFunc("GET /orders/{id}", r.router.GetOrder)
 
-	addr := fmt.Sprintf(":%d", port)
+	addr := fmt.Sprintf(":%d", r.port)
 
 	log.Printf("Starting %s on %s\n", r.name, addr)
 	r.server = &http.Server{Addr: addr, Handler: mux}

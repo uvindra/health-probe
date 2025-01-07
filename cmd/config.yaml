@@ -1,0 +1,10 @@
+services:
+  - name: "OrderService"
+    host: "localhost"
+    port: 8080
+  - name: "InventoryService"
+    host: "localhost"
+    port: 8081
+  - name: "CatalogService"
+    host: "localhost"
+    port: 8082

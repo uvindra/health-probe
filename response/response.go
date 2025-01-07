@@ -1,4 +1,4 @@
-package common
+package response
 
 type ServiceResponse struct {
 	message    string

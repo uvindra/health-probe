@@ -1,7 +1,7 @@
 package order_service
 
 import (
-	cmn "health-probe/common"
+	res "health-probe/response"
 	"net/http"
 	"sync"
 )
@@ -17,28 +17,28 @@ func NewOrderService() *OrderService {
 	}
 }
 
-func (s *OrderService) placeOrder(order Order) cmn.ServiceResponse {
+func (s *OrderService) placeOrder(order Order) res.ServiceResponse {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	_, exists := s.orders[order.OrderId]
 
 	if exists {
-		return cmn.NewErrorResponse("order already exists", http.StatusBadRequest)
+		return res.NewErrorResponse("order already exists", http.StatusBadRequest)
 	}
 
 	s.orders[order.OrderId] = order
-	return cmn.NewSuccessResponse("", http.StatusCreated)
+	return res.NewSuccessResponse("", http.StatusCreated)
 }
 
-func (s *OrderService) fetchOrder(id string) (Order, cmn.ServiceResponse) {
+func (s *OrderService) fetchOrder(id string) (Order, res.ServiceResponse) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	order, exists := s.orders[id]
 	if !exists {
-		return Order{}, cmn.NewErrorResponse("order not found", http.StatusNotFound)
+		return Order{}, res.NewErrorResponse("order not found", http.StatusNotFound)
 	}
 
-	return order, cmn.NewSuccessResponse("", http.StatusOK)
+	return order, res.NewSuccessResponse("", http.StatusOK)
 }

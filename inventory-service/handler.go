@@ -18,7 +18,7 @@ func NewInventoryRouter(service *InventoryService) *InventoryHandler {
 func (router *InventoryHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	item, resp := router.service.GetItem(id)
+	item, resp := router.service.getItem(id)
 
 	if resp.IsError() {
 		http.Error(w, resp.Error(), resp.HttpStatus())
@@ -34,7 +34,7 @@ func (router *InventoryHandler) AddItem(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	resp := router.service.AddItem(item)
+	resp := router.service.addItem(item)
 	if resp.IsError() {
 		http.Error(w, resp.Error(), resp.HttpStatus())
 		return
@@ -49,7 +49,7 @@ func (router *InventoryHandler) UpdateItem(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	resp := router.service.UpdateItem(item)
+	resp := router.service.updateItem(item)
 	if resp.IsError() {
 		http.Error(w, resp.Error(), resp.HttpStatus())
 		return
@@ -61,7 +61,7 @@ func (router *InventoryHandler) UpdateItem(w http.ResponseWriter, r *http.Reques
 func (router *InventoryHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	resp := router.service.DeleteItem(id)
+	resp := router.service.deleteItem(id)
 
 	if resp.IsError() {
 		http.Error(w, resp.Error(), resp.HttpStatus())

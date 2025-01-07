@@ -1,7 +1,7 @@
 package inventory_service
 
 import (
-	cmn "health-probe/common"
+	res "health-probe/response"
 	"net/http"
 	"sync"
 )
@@ -17,56 +17,56 @@ func NewInventoryService() *InventoryService {
 	}
 }
 
-func (inventorySvc *InventoryService) GetItem(id string) (Item, cmn.ServiceResponse) {
+func (inventorySvc *InventoryService) getItem(id string) (Item, res.ServiceResponse) {
 	inventorySvc.mu.Lock()
 	defer inventorySvc.mu.Unlock()
 
 	item, exists := inventorySvc.inventory[id]
 	if !exists {
-		return Item{}, cmn.NewErrorResponse("item not found", http.StatusNotFound)
+		return Item{}, res.NewErrorResponse("item not found", http.StatusNotFound)
 	}
 
-	return item, cmn.NewSuccessResponse("", http.StatusOK)
+	return item, res.NewSuccessResponse("", http.StatusOK)
 }
 
-func (inventorySvc *InventoryService) AddItem(item Item) cmn.ServiceResponse {
+func (inventorySvc *InventoryService) addItem(item Item) res.ServiceResponse {
 	inventorySvc.mu.Lock()
 	defer inventorySvc.mu.Unlock()
 
 	_, exists := inventorySvc.inventory[item.ItemId]
 
 	if exists {
-		return cmn.NewErrorResponse("item already exists", http.StatusBadRequest)
+		return res.NewErrorResponse("item already exists", http.StatusBadRequest)
 	}
 
 	inventorySvc.inventory[item.ItemId] = item
-	return cmn.NewSuccessResponse("", http.StatusCreated)
+	return res.NewSuccessResponse("", http.StatusCreated)
 }
 
-func (inventorySvc *InventoryService) UpdateItem(item Item) cmn.ServiceResponse {
+func (inventorySvc *InventoryService) updateItem(item Item) res.ServiceResponse {
 	inventorySvc.mu.Lock()
 	defer inventorySvc.mu.Unlock()
 
 	_, exists := inventorySvc.inventory[item.ItemId]
 
 	if !exists {
-		return cmn.NewErrorResponse("item not found", http.StatusNotFound)
+		return res.NewErrorResponse("item not found", http.StatusNotFound)
 	}
 
 	inventorySvc.inventory[item.ItemId] = item
-	return cmn.NewSuccessResponse("", http.StatusCreated)
+	return res.NewSuccessResponse("", http.StatusCreated)
 }
 
-func (inventorySvc *InventoryService) DeleteItem(id string) cmn.ServiceResponse {
+func (inventorySvc *InventoryService) deleteItem(id string) res.ServiceResponse {
 	inventorySvc.mu.Lock()
 	defer inventorySvc.mu.Unlock()
 
 	_, exists := inventorySvc.inventory[id]
 
 	if !exists {
-		return cmn.NewErrorResponse("item not found", http.StatusNotFound)
+		return res.NewErrorResponse("item not found", http.StatusNotFound)
 	}
 
 	delete(inventorySvc.inventory, id)
-	return cmn.NewSuccessResponse("", http.StatusCreated)
+	return res.NewSuccessResponse("", http.StatusCreated)
 }
