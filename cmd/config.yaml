@@ -5,6 +5,6 @@ services:
   - name: "InventoryService"
     host: "localhost"
     port: 8081
-  - name: "CatalogService"
+  - name: "AccountService"
     host: "localhost"
     port: 8082

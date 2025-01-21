@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
-	cms "health-probe/catalog-service"
-	ims "health-probe/inventory-service"
+	acc "health-probe/account"
+	ims "health-probe/inventory"
 	"log"
 	"os"
 
-	oms "health-probe/order-service"
+	oms "health-probe/order"
 
 	"gopkg.in/yaml.v3"
 )
 
-const CATALOG_SERVICE = "CatalogService"
+const ACCOUNT_SERVICE = "AccountService"
 const INVENTORY_SERVICE = "InventoryService"
 const ORDER_SERVICE = "OrderService"
 
@@ -49,8 +49,8 @@ func setup() {
 
 	for _, service := range config.services {
 		switch service.name {
-		case CATALOG_SERVICE:
-			configLookup[CATALOG_SERVICE] = service
+		case ACCOUNT_SERVICE:
+			configLookup[ACCOUNT_SERVICE] = service
 		case INVENTORY_SERVICE:
 			configLookup[INVENTORY_SERVICE] = service
 		case ORDER_SERVICE:
@@ -60,12 +60,12 @@ func setup() {
 
 	for _, service := range config.services {
 		switch service.name {
-		case CATALOG_SERVICE:
-			serviceLookup[CATALOG_SERVICE] = cms.NewCatalogServiceRunner(service.port, getInventoryServiceUrl())
+		case ACCOUNT_SERVICE:
+			serviceLookup[ACCOUNT_SERVICE] = acc.NewRunner(service.port)
 		case INVENTORY_SERVICE:
-			serviceLookup[INVENTORY_SERVICE] = ims.NewInventoryServiceRunner(service.port)
+			serviceLookup[INVENTORY_SERVICE] = ims.NewRunner(service.port)
 		case ORDER_SERVICE:
-			serviceLookup[ORDER_SERVICE] = oms.NewOrderServiceRunner(service.port)
+			serviceLookup[ORDER_SERVICE] = oms.NewRunner(service.port, getInventoryServiceUrl())
 		}
 	}
 }
