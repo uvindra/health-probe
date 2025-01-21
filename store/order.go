@@ -1,7 +1,10 @@
 package store
 
 import (
+	"fmt"
+
 	enum "health-probe/enum"
+
 	mod "health-probe/models"
 	"sync"
 )
@@ -26,7 +29,7 @@ func (s *orderStore) AddOrderTracker(order mod.Order, state enum.OrderState) {
 
 	seed := s.seeds[order.CustomerId]
 	seed++
-	orderId := order.CustomerId + "-" + string(seed)
+	orderId := order.CustomerId + "-" + fmt.Sprint(seed)
 
 	trk := s.trackers[order.CustomerId]
 

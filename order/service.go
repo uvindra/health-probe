@@ -57,7 +57,6 @@ func (s *OrderService) placeOrder(order mod.Order) res.ServiceResponse {
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
-		defer resp.Body.Close()
 
 		if err != nil {
 			s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Failed))
