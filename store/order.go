@@ -20,6 +20,7 @@ type orderStore struct {
 func NewOrderStore() *orderStore {
 	return &orderStore{
 		trackers: make(map[string]tracker),
+		seeds:    make(map[string]int),
 	}
 }
 

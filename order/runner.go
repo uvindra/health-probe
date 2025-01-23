@@ -28,14 +28,13 @@ func (r *OrderServiceRunner) Start() {
 	mux.HandleFunc("GET /orders/{id}", r.handler.GetOrder)
 
 	addr := fmt.Sprintf(":%d", r.port)
+	r.server = &http.Server{Addr: addr, Handler: mux}
 
 	log.Printf("Starting %s on %s\n", r.name, addr)
-	r.server = &http.Server{Addr: addr, Handler: mux}
 
 	if err := r.server.ListenAndServe(); err != nil {
 		log.Panicf("Could not start %s: %s\n", r.name, err)
 	}
-
 }
 
 func (r *OrderServiceRunner) Stop() {

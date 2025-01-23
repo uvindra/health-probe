@@ -12,9 +12,9 @@ type InventoryService struct {
 	inventory store.InventoryStore
 }
 
-func NewService() *InventoryService {
+func NewService(capacity int, reserve int) *InventoryService {
 	svc := &InventoryService{
-		inventory: store.NewInventoryStore(10, 10000),
+		inventory: store.NewInventoryStore(capacity, reserve),
 	}
 
 	svc.inventory.PopulateData()

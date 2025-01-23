@@ -1,10 +1,16 @@
 services:
-  - name: "OrderService"
+  - name: "ControlerService"
     host: "localhost"
     port: 8080
-  - name: "InventoryService"
+  - name: "OrderService"
     host: "localhost"
     port: 8081
-  - name: "AccountService"
+  - name: "InventoryService"
     host: "localhost"
     port: 8082
+  - name: "CatalogService"
+    host: "localhost"
+    port: 8083
+inventory:
+  maxItems: 100
+  maxItemQuantity: 10000

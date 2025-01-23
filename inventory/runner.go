@@ -13,11 +13,17 @@ type InventoryServiceRunner struct {
 	port    int
 }
 
-func NewRunner(port int) *InventoryServiceRunner {
+type RunnerConfig struct {
+	Port     int
+	Capacity int
+	Reserve  int
+}
+
+func NewRunner(cfg RunnerConfig) *InventoryServiceRunner {
 	return &InventoryServiceRunner{
-		handler: NewHandler(NewService()),
+		handler: NewHandler(NewService(cfg.Capacity, cfg.Reserve)),
 		name:    "Inventory Service",
-		port:    port,
+		port:    cfg.Port,
 	}
 }
 
@@ -29,14 +35,13 @@ func (r *InventoryServiceRunner) Start() {
 	mux.HandleFunc("PATCH /items/{id}/deduct", r.handler.DeductItemQty)
 
 	addr := fmt.Sprintf(":%d", r.port)
+	r.server = &http.Server{Addr: addr, Handler: mux}
 
 	log.Printf("Starting %s on %s\n", r.name, addr)
-	r.server = &http.Server{Addr: addr, Handler: mux}
 
 	if err := r.server.ListenAndServe(); err != nil {
 		log.Panicf("Could not start %s: %s\n", r.name, err)
 	}
-
 }
 
 func (r *InventoryServiceRunner) Stop() {
