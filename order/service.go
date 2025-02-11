@@ -1,11 +1,10 @@
 package order
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"health-probe/enum"
 	mod "health-probe/models"
+	intern "health-probe/order/dependencies"
+	"health-probe/probe"
 	res "health-probe/response"
 	store "health-probe/store"
 	"net/http"
@@ -18,68 +17,37 @@ type OrderStore interface {
 }
 
 type OrderService struct {
-	inventorySvcUrl string
-	placedOrders    OrderStore
+	inventorySvc *intern.InventorySvc
+	placedOrders OrderStore
+	probe        *probe.LocalProbe
 }
 
-const deduct = "/items/{%d}/deduct"
-
 func NewService(inventorySvcUrl string) *OrderService {
+	inventorySvc := intern.NewInventorySvc(inventorySvcUrl)
 	return &OrderService{
-		inventorySvcUrl: inventorySvcUrl,
-		placedOrders:    store.NewOrderStore(),
+		inventorySvc: inventorySvc,
+		placedOrders: store.NewOrderStore(),
+		probe:        probe.NewLocalProbe("OrderSvc"),
 	}
 }
 
 func (s *OrderService) placeOrder(order mod.Order) res.ServiceResponse {
-	resource := s.inventorySvcUrl + deduct
+	res := s.inventorySvc.DeductQuantity(order)
 
-	for _, item := range order.Items {
-		url := fmt.Sprintf(resource, item.Id)
-
-		orderQty := mod.OrderQty{Quantity: item.Quantity}
-
-		payload, err := json.Marshal(orderQty)
-
-		if err != nil {
-			s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Failed))
-			return res.NewErrorResponse(fmt.Sprintf("Error when marshaling OrderQty json: %s", err.Error()),
-				http.StatusInternalServerError)
-		}
-
-		req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(payload))
-
-		if err != nil {
-			s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Failed))
-			return res.NewErrorResponse(fmt.Sprintf("Error when building inventory request: %s", err.Error()),
-				http.StatusInternalServerError)
-		}
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-
-		if err != nil {
-			s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Failed))
-			return res.NewErrorResponse(fmt.Sprintf("Error when calling inventory service: %s", err.Error()),
-				http.StatusInternalServerError)
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Failed))
-			return res.NewErrorResponse(fmt.Sprintf("Unexpected status when deducting item from inventory service: %s", resp.Status),
-				http.StatusInternalServerError)
-		}
+	if res.IsError() {
+		s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Failed))
+	} else {
+		s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Successful))
 	}
 
-	s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Successful))
-	return res.NewSuccessResponse("", http.StatusCreated)
+	return res
 }
 
 func (s *OrderService) fetchOrder(customerId string, orderId string) (mod.Order, res.ServiceResponse) {
 	tracker, ok := s.placedOrders.GetOrderTracker(customerId, orderId)
 
 	if !ok {
-		return mod.Order{}, res.NewErrorResponse("order not found", http.StatusNotFound)
+		return mod.Order{}, res.NewErrorResponse("order not found", http.StatusNotFound, s.probe.BaseProbe)
 	}
 
 	order := mod.Order{
@@ -87,5 +55,13 @@ func (s *OrderService) fetchOrder(customerId string, orderId string) (mod.Order,
 		Items:      tracker.Items,
 	}
 
-	return order, res.NewSuccessResponse("", http.StatusOK)
+	return order, res.NewSuccessResponse("", http.StatusOK, s.probe.BaseProbe)
+}
+
+func (s *OrderService) GetLocalProbes() []probe.LocalProbe {
+	return []probe.LocalProbe{*s.probe}
+}
+
+func (s *OrderService) GetDependencyProbes() []probe.DependencyProbe {
+	return []probe.DependencyProbe{*s.inventorySvc.GetProbe()}
 }

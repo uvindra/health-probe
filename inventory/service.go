@@ -1,8 +1,8 @@
 package inventory
 
 import (
-	"fmt"
 	mod "health-probe/models"
+	"health-probe/probe"
 	res "health-probe/response"
 	store "health-probe/store"
 	"net/http"
@@ -10,6 +10,7 @@ import (
 
 type InventoryService struct {
 	inventory store.InventoryStore
+	probe     *probe.LocalProbe
 }
 
 func NewService(capacity int, reserve int) *InventoryService {
@@ -21,28 +22,40 @@ func NewService(capacity int, reserve int) *InventoryService {
 	return svc
 }
 
-func (inventorySvc *InventoryService) getItems() ([]mod.Item, res.ServiceResponse) {
-	items := inventorySvc.inventory.GetItems()
+func (i *InventoryService) getItems() ([]mod.Item, res.ServiceResponse) {
+	items := i.inventory.GetItems()
 
-	return items, res.NewSuccessResponse("", http.StatusOK)
-}
-
-func (inventorySvc *InventoryService) getItem(id int) (mod.Item, res.ServiceResponse) {
-	item, exists := inventorySvc.inventory.GetItem(id)
-	if !exists {
-		return mod.Item{}, res.NewErrorResponse("item not found", http.StatusNotFound)
+	if len(items) == 0 {
+		return nil, res.NewErrorResponse("Items do not exist", http.StatusNotFound, i.probe.BaseProbe)
 	}
 
-	return item, res.NewSuccessResponse("", http.StatusOK)
+	return items, res.NewSuccessResponse("", http.StatusOK, i.probe.BaseProbe)
 }
 
-func (inventorySvc *InventoryService) deductItemQty(id int, quantity int) res.ServiceResponse {
-	ok := inventorySvc.inventory.DeductItemQty(id, quantity)
+func (i *InventoryService) getItem(id int) (*mod.Item, res.ServiceResponse) {
+	item, ok := i.inventory.GetItem(id)
 
 	if !ok {
-		return res.NewErrorResponse(fmt.Sprintf("Dedcut qty:%d  is greater than current reserve", quantity),
-			http.StatusBadRequest)
+		return nil, res.NewErrorResponse("Item not found", http.StatusNotFound, i.probe.BaseProbe)
 	}
 
-	return res.NewSuccessResponse("", http.StatusOK)
+	return item, res.NewSuccessResponse("", http.StatusOK, i.probe.BaseProbe)
+}
+
+func (i *InventoryService) deductItemQty(id int, quantity int) res.ServiceResponse {
+	ok := i.inventory.DeductItemQty(id, quantity)
+
+	if !ok {
+		return res.NewErrorResponse("Item not found", http.StatusNotFound, i.probe.BaseProbe)
+	}
+
+	return res.NewSuccessResponse("", http.StatusOK, i.probe.BaseProbe)
+}
+
+func (i *InventoryService) GetLocalProbes() []probe.LocalProbe {
+	return []probe.LocalProbe{*i.probe}
+}
+
+func (i *InventoryService) GetDependencyProbes() []probe.DependencyProbe {
+	return nil
 }

@@ -3,6 +3,7 @@ package inventory
 import (
 	"encoding/json"
 	mod "health-probe/models"
+	"health-probe/probe"
 	"net/http"
 	"strconv"
 )
@@ -25,7 +26,11 @@ func (h *InventoryHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(items)
+	err := json.NewEncoder(w).Encode(items)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (h *InventoryHandler) GetItem(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +49,11 @@ func (h *InventoryHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(item)
+	err = json.NewEncoder(w).Encode(item)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (h *InventoryHandler) DeductItemQty(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +61,7 @@ func (h *InventoryHandler) DeductItemQty(w http.ResponseWriter, r *http.Request)
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil {
-		http.Error(w, "Invalid item ID", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -67,5 +76,13 @@ func (h *InventoryHandler) DeductItemQty(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	json.NewEncoder(w).Encode(qty)
+	err = json.NewEncoder(w).Encode(qty)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (h *InventoryHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	probe.WriteProbes(h.service, w)
 }

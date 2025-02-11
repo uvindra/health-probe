@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"encoding/json"
+	probe "health-probe/probe"
 	"net/http"
 )
 
@@ -21,5 +22,14 @@ func (h *CatalogHandler) GetSuggestion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(item)
+	err := json.NewEncoder(w).Encode(item)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *CatalogHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	probe.WriteProbes(h.service, w)
 }

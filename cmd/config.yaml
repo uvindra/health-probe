@@ -14,3 +14,7 @@ services:
 inventory:
   maxItems: 100
   maxItemQuantity: 10000
+customer:
+  maxCustomers: 10
+  itemsPerOrder: 5
+  quantityPerItem: 1

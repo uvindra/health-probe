@@ -1,16 +1,20 @@
 package response
 
+import "health-probe/probe"
+
 type ServiceResponse struct {
 	message    string
 	httpStatus int
 	isError    bool
 }
 
-func NewSuccessResponse(message string, httpStatus int) ServiceResponse {
+func NewSuccessResponse(message string, httpStatus int, probe *probe.BaseProbe) ServiceResponse {
+	probe.IncrementSuccessCount()
 	return ServiceResponse{message: message, httpStatus: httpStatus, isError: false}
 }
 
-func NewErrorResponse(message string, httpStatus int) ServiceResponse {
+func NewErrorResponse(message string, httpStatus int, probe *probe.BaseProbe) ServiceResponse {
+	probe.IncrementErrorCount()
 	return ServiceResponse{message: message, httpStatus: httpStatus, isError: true}
 }
 

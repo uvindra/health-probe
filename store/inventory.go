@@ -8,7 +8,7 @@ import (
 )
 
 type InventoryStore interface {
-	GetItem(id int) (mod.Item, bool)
+	GetItem(id int) (*mod.Item, bool)
 	GetItems() []mod.Item
 	PopulateData()
 	DeductItemQty(id int, qty int) bool
@@ -31,13 +31,17 @@ func NewInventoryStore(capacity int, reserve int) *inventoryStore {
 	}
 }
 
-func (d *inventoryStore) GetItem(id int) (mod.Item, bool) {
-	d.validate(id)
+func (d *inventoryStore) GetItem(id int) (*mod.Item, bool) {
+	ok := d.validate(id)
+
+	if !ok {
+		return nil, false
+	}
 
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	return d.items[id], true
+	return &d.items[id], true
 }
 
 func (d *inventoryStore) GetItems() []mod.Item {
@@ -68,7 +72,11 @@ func (d *inventoryStore) PopulateData() {
 }
 
 func (d *inventoryStore) DeductItemQty(id int, qty int) bool {
-	d.validate(id)
+	ok := d.validate(id)
+
+	if !ok {
+		return false
+	}
 
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -81,12 +89,15 @@ func (d *inventoryStore) DeductItemQty(id int, qty int) bool {
 	return true
 }
 
-func (d *inventoryStore) validate(id int) {
+func (d *inventoryStore) validate(id int) bool {
 	if !d.populated {
 		log.Panic("data not populated")
 	}
 
 	if id == 0 || id > len(d.items) {
-		log.Panic("invalid item id")
+		log.Println("invalid item id")
+		return false
 	}
+
+	return true
 }

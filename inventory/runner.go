@@ -33,6 +33,7 @@ func (r *InventoryServiceRunner) Start() {
 	mux.HandleFunc("GET /items/{id}", r.handler.GetItem)
 	mux.HandleFunc("GET /items", r.handler.GetItems)
 	mux.HandleFunc("PATCH /items/{id}/deduct", r.handler.DeductItemQty)
+	mux.HandleFunc("GET /health", r.handler.GetHealth)
 
 	addr := fmt.Sprintf(":%d", r.port)
 	r.server = &http.Server{Addr: addr, Handler: mux}

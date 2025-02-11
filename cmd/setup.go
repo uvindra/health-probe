@@ -6,6 +6,7 @@ import (
 	cat "health-probe/catalog"
 	ctl "health-probe/controler"
 	ims "health-probe/inventory"
+	"health-probe/models"
 	"log"
 
 	oms "health-probe/order"
@@ -23,23 +24,13 @@ type Service interface {
 	Stop()
 }
 
-type ServiceConfig struct {
-	Name string `yaml:"name"`
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
-}
-
-type InventoryConfig struct {
-	MaxItems        int `yaml:"maxItems"`
-	MaxItemQuantity int `yaml:"maxItemQuantity"`
-}
-
 type Config struct {
-	Services  []ServiceConfig `yaml:"services"`
-	Inventory InventoryConfig `yaml:"inventory"`
+	Services  []models.ServiceConfig `yaml:"services"`
+	Inventory models.InventoryConfig `yaml:"inventory"`
+	Customer  models.CustomerConfig  `yaml:"customer"`
 }
 
-var serviceConfigLookup = make(map[string]ServiceConfig)
+var serviceConfigLookup = make(map[string]models.ServiceConfig)
 var services = make(map[string]Service)
 var controler Service
 var config Config
@@ -65,7 +56,9 @@ func setup() {
 	for _, service := range config.Services {
 		switch service.Name {
 		case CONTROLER_SERVICE:
-			controler = ctl.NewRunner(service.Port)
+			cfg := ctl.RunnerConfig{Port: service.Port, CustomerConfig: config.Customer, OrderSvcUrl: getOrderServiceUrl(),
+				CatalogSvcUrl: getCatalogServiceUrl()}
+			controler = ctl.NewRunner(cfg)
 		case CATALOG_SERVICE:
 			cfg := cat.RunnerConfig{Port: service.Port, Capacity: config.Inventory.MaxItems, InventorySvcUrl: getInventoryServiceUrl()}
 			services[CATALOG_SERVICE] = cat.NewRunner(cfg)
@@ -100,6 +93,26 @@ func getInventoryServiceUrl() string {
 
 	if !exists {
 		log.Panic("Inventory service not found in config")
+	}
+
+	return config.Host + ":" + fmt.Sprint(config.Port)
+}
+
+func getCatalogServiceUrl() string {
+	config, exists := serviceConfigLookup[CATALOG_SERVICE]
+
+	if !exists {
+		log.Panic("Catalog service not found in config")
+	}
+
+	return config.Host + ":" + fmt.Sprint(config.Port)
+}
+
+func getOrderServiceUrl() string {
+	config, exists := serviceConfigLookup[ORDER_SERVICE]
+
+	if !exists {
+		log.Panic("Order service not found in config")
 	}
 
 	return config.Host + ":" + fmt.Sprint(config.Port)

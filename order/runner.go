@@ -26,6 +26,7 @@ func (r *OrderServiceRunner) Start() {
 
 	mux.HandleFunc("POST /orders", r.handler.CreateOrder)
 	mux.HandleFunc("GET /orders/{id}", r.handler.GetOrder)
+	mux.HandleFunc("GET /health", r.handler.GetHealth)
 
 	addr := fmt.Sprintf(":%d", r.port)
 	r.server = &http.Server{Addr: addr, Handler: mux}
