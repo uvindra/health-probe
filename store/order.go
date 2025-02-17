@@ -34,6 +34,11 @@ func (s *orderStore) AddOrderTracker(order mod.Order, state enum.OrderState) {
 
 	trk := s.trackers[order.CustomerId]
 
+	if trk == nil {
+		trk = make(map[string]mod.OrderTracker)
+		s.trackers[order.CustomerId] = trk
+	}
+
 	trk[orderId] = mod.OrderTracker{
 		Id:         orderId,
 		CustomerId: order.CustomerId,

@@ -1,20 +1,20 @@
 services:
   - name: "ControlerService"
-    host: "localhost"
+    host: "http://localhost"
     port: 8080
   - name: "OrderService"
-    host: "localhost"
+    host: "http://localhost"
     port: 8081
   - name: "InventoryService"
-    host: "localhost"
+    host: "http://localhost"
     port: 8082
   - name: "CatalogService"
-    host: "localhost"
+    host: "http://localhost"
     port: 8083
 inventory:
   maxItems: 100
   maxItemQuantity: 10000
 customer:
-  maxCustomers: 10
+  maxCustomers: 1
   itemsPerOrder: 5
   quantityPerItem: 1

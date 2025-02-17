@@ -9,27 +9,24 @@ import (
 
 type OrderHandler struct {
 	service *OrderService
-	probe   probe.DependencyProbe
 }
 
 func NewHandler(service *OrderService) *OrderHandler {
 	return &OrderHandler{
 		service: service,
-		probe:   probe.DependencyProbe{},
 	}
 }
 
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var order mod.Order
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
-		h.probe.IncrementErrorCount()
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	resp := h.service.placeOrder(order)
 	if resp.IsError() {
-		h.probe.IncrementErrorCount()
 		http.Error(w, resp.Error(), resp.HttpStatus())
 		return
 	}
@@ -37,22 +34,19 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	err := json.NewEncoder(w).Encode(order)
 
 	if err != nil {
-		h.probe.IncrementErrorCount()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	h.probe.IncrementSuccessCount()
 }
 
 func (h *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	id := r.PathValue("id")
 	customerId := r.Header.Get("customerId")
 
 	order, resp := h.service.fetchOrder(customerId, id)
 
 	if resp.IsError() {
-		h.probe.IncrementErrorCount()
 		http.Error(w, resp.Error(), resp.HttpStatus())
 		return
 	}
@@ -60,14 +54,12 @@ func (h *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	err := json.NewEncoder(w).Encode(order)
 
 	if err != nil {
-		h.probe.IncrementErrorCount()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	h.probe.IncrementSuccessCount()
 }
 
 func (h *OrderHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	probe.WriteProbes(h.service, w)
 }

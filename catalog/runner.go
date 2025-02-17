@@ -30,7 +30,7 @@ func NewRunner(cfg RunnerConfig) *CatalogServiceRunner {
 func (r *CatalogServiceRunner) Start() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /suggestion", r.handler.GetSuggestion)
+	mux.HandleFunc("GET /suggest", r.handler.GetSuggestion)
 	mux.HandleFunc("GET /health", r.handler.GetHealth)
 
 	addr := fmt.Sprintf(":%d", r.port)

@@ -24,8 +24,8 @@ func NewRunner(port int, inventorySvcUrl string) *OrderServiceRunner {
 func (r *OrderServiceRunner) Start() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /orders", r.handler.CreateOrder)
-	mux.HandleFunc("GET /orders/{id}", r.handler.GetOrder)
+	mux.HandleFunc("POST /order", r.handler.CreateOrder)
+	mux.HandleFunc("GET /order/{id}", r.handler.GetOrder)
 	mux.HandleFunc("GET /health", r.handler.GetHealth)
 
 	addr := fmt.Sprintf(":%d", r.port)

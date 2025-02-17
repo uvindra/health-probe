@@ -19,6 +19,7 @@ func NewHandler(service *InventoryService) *InventoryHandler {
 }
 
 func (h *InventoryHandler) GetItems(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	items, resp := h.service.getItems()
 
 	if resp.IsError() {
@@ -34,6 +35,7 @@ func (h *InventoryHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *InventoryHandler) GetItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 
@@ -57,6 +59,7 @@ func (h *InventoryHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *InventoryHandler) DeductItemQty(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 
@@ -84,5 +87,6 @@ func (h *InventoryHandler) DeductItemQty(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *InventoryHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	probe.WriteProbes(h.service, w)
 }

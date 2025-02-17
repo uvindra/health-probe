@@ -25,6 +25,8 @@ func WriteProbes(c ProbeContainer, w http.ResponseWriter) {
 			TotalFailed:    probe.GetErrorCount(),
 			TotalCompleted: probe.GetSuccessCount(),
 		})
+
+		probe.Reset()
 	}
 
 	for _, probe := range localProbes {
@@ -33,6 +35,8 @@ func WriteProbes(c ProbeContainer, w http.ResponseWriter) {
 			TotalFailed:    probe.GetErrorCount(),
 			TotalCompleted: probe.GetSuccessCount(),
 		})
+
+		probe.Reset()
 	}
 
 	stat := models.Health{

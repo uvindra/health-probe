@@ -6,6 +6,7 @@ import (
 	mod "health-probe/models"
 	"health-probe/probe"
 	res "health-probe/response"
+	"log"
 	"math/rand"
 	"net/http"
 )
@@ -16,7 +17,7 @@ type InventorySvc struct {
 	probe           *probe.DependencyProbe
 }
 
-const getItem = "/items/{%d}"
+const getItem = "/items/%d"
 
 func NewInventorySvc(capacity int, inventorySvcUrl string) *InventorySvc {
 	probe := probe.NewDependencyProbe("CatalogSvc", "InventorySvc")
@@ -27,6 +28,8 @@ func (i *InventorySvc) GetRandomItem() (mod.Item, res.ServiceResponse) {
 	itemId := i.randomInRange()
 
 	url := fmt.Sprintf(i.inventorySvcUrl+getItem, itemId)
+
+	log.Printf("Getting suggestion from inventory service: %s", url)
 
 	resp, err := http.Get(url)
 

@@ -39,6 +39,7 @@ func (s *OrderService) placeOrder(order mod.Order) res.ServiceResponse {
 	} else {
 		s.placedOrders.AddOrderTracker(order, enum.NewOrderState(enum.Successful))
 	}
+	s.probe.IncrementSuccessCount()
 
 	return res
 }
@@ -47,6 +48,7 @@ func (s *OrderService) fetchOrder(customerId string, orderId string) (mod.Order,
 	tracker, ok := s.placedOrders.GetOrderTracker(customerId, orderId)
 
 	if !ok {
+		s.probe.IncrementErrorCount()
 		return mod.Order{}, res.NewErrorResponse("order not found", http.StatusNotFound, s.probe.BaseProbe)
 	}
 
@@ -55,6 +57,7 @@ func (s *OrderService) fetchOrder(customerId string, orderId string) (mod.Order,
 		Items:      tracker.Items,
 	}
 
+	s.probe.IncrementSuccessCount()
 	return order, res.NewSuccessResponse("", http.StatusOK, s.probe.BaseProbe)
 }
 

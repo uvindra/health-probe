@@ -1,5 +1,9 @@
 package probe
 
+import (
+	"sync/atomic"
+)
+
 type DependencyProbe struct {
 	clientName string
 	serverName string
@@ -7,7 +11,8 @@ type DependencyProbe struct {
 }
 
 func NewDependencyProbe(clientName, serverName string) *DependencyProbe {
-	return &DependencyProbe{clientName: clientName, serverName: serverName}
+	BaseProbe := &BaseProbe{errorCount: atomic.Uint32{}, successCount: atomic.Uint32{}}
+	return &DependencyProbe{clientName: clientName, serverName: serverName, BaseProbe: BaseProbe}
 }
 
 func (p *DependencyProbe) GetClientName() string {

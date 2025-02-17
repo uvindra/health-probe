@@ -37,6 +37,7 @@ func (c *Customer) BeginShopping(stop chan bool) {
 			fmt.Println("Ending shopping for customer ", c.customerId)
 			return
 		default:
+			log.Printf("Customer %s is shopping", c.customerId)
 			c.beginOrdering()
 			time.Sleep(2 * time.Second)
 		}
@@ -81,6 +82,8 @@ func (c *Customer) getSuggestion() (mod.Item, error) {
 
 	var item mod.Item
 
+	log.Printf("Getting suggestion response: %v", resp)
+
 	if err := json.NewDecoder(resp.Body).Decode(&item); err != nil {
 		return mod.Item{}, err
 	}
@@ -96,6 +99,8 @@ func (c *Customer) placeOrder(order mod.Order) error {
 	}
 
 	req, err := http.NewRequest(http.MethodPost, c.orderSvcUrl+"/order", bytes.NewBuffer(payload))
+
+	log.Printf("Placing order: %v", order)
 
 	if err != nil {
 		return err

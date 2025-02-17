@@ -15,6 +15,7 @@ func NewHandler(service *Catalog) *CatalogHandler {
 }
 
 func (h *CatalogHandler) GetSuggestion(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	item, resp := h.service.GetSuggestion()
 
 	if resp.IsError() {
@@ -31,5 +32,6 @@ func (h *CatalogHandler) GetSuggestion(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CatalogHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	probe.WriteProbes(h.service, w)
 }

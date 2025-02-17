@@ -18,15 +18,18 @@ type ControlerRunner struct {
 }
 
 type RunnerConfig struct {
-	Port           int
-	CustomerConfig models.CustomerConfig
-	OrderSvcUrl    string
-	CatalogSvcUrl  string
+	Port            int
+	CustomerConfig  models.CustomerConfig
+	OrderSvcUrl     string
+	CatalogSvcUrl   string
+	InventorySvcUrl string
 }
 
 func NewRunner(cfg RunnerConfig) *ControlerRunner {
+	services := map[string]string{"Catalog Service": cfg.CatalogSvcUrl, "Order Service": cfg.OrderSvcUrl, "Inventory Service": cfg.InventorySvcUrl}
+
 	runner := &ControlerRunner{
-		handler:          NewHandler(NewControler()),
+		handler:          NewHandler(NewControler(services)),
 		name:             "Controler Service",
 		port:             cfg.Port,
 		customers:        make([]*customer.Customer, cfg.CustomerConfig.MaxCustomers),
@@ -54,12 +57,6 @@ func (r *ControlerRunner) Start() {
 
 	if err := r.server.ListenAndServe(); err != nil {
 		log.Panicf("Could not start %s: %s\n", r.name, err)
-	}
-
-	for _, c := range r.customers {
-		stopChannel := make(chan bool)
-		r.customerChannels = append(r.customerChannels, stopChannel)
-		go c.BeginShopping(stopChannel)
 	}
 }
 

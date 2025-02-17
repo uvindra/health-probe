@@ -57,7 +57,7 @@ func setup() {
 		switch service.Name {
 		case CONTROLER_SERVICE:
 			cfg := ctl.RunnerConfig{Port: service.Port, CustomerConfig: config.Customer, OrderSvcUrl: getOrderServiceUrl(),
-				CatalogSvcUrl: getCatalogServiceUrl()}
+				CatalogSvcUrl: getCatalogServiceUrl(), InventorySvcUrl: getInventoryServiceUrl()}
 			controler = ctl.NewRunner(cfg)
 		case CATALOG_SERVICE:
 			cfg := cat.RunnerConfig{Port: service.Port, Capacity: config.Inventory.MaxItems, InventorySvcUrl: getInventoryServiceUrl()}

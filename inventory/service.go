@@ -16,6 +16,7 @@ type InventoryService struct {
 func NewService(capacity int, reserve int) *InventoryService {
 	svc := &InventoryService{
 		inventory: store.NewInventoryStore(capacity, reserve),
+		probe:     probe.NewLocalProbe("InventorySvc"),
 	}
 
 	svc.inventory.PopulateData()

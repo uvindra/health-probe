@@ -37,8 +37,12 @@ type Health struct {
 	LocalProbes      []LocalProbe      `json:"localProbes"`
 }
 
+type OverallHealth struct {
+	HealthStats map[string]Health `json:"healthStats"`
+}
+
 type Item struct {
-	Id       int    `json:"Id"`
+	Id       int    `json:"id"`
 	Name     string `json:"name"`
 	Quantity int    `json:"quantity"`
 }
